@@ -1,15 +1,14 @@
 package com.ombremoon.playingcards.network;
 
-import com.ombremoon.playingcards.item.ItemCardCovered;
-import com.ombremoon.playingcards.main.CommonClass;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.ombremoon.playingcards.item.ItemCardCovered;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.NetworkEvent;
 
-public class PacketInteractCard implements CustomPacketPayload {
-    public static final CustomPacketPayload.Type<PacketInteractCard> TYPE = new CustomPacketPayload.Type<>(CommonClass.customLocation("interact_card"));
+import java.util.function.Supplier;
+
+public class PacketInteractCard {
     private final String command;
 
     public PacketInteractCard (String command) {
@@ -20,21 +19,15 @@ public class PacketInteractCard implements CustomPacketPayload {
         command = buf.readUtf(11).trim();
     }
 
-    @Override
-    public void write(FriendlyByteBuf buf) {
+    public void encode(FriendlyByteBuf buf) {
         buf.writeUtf(command, 11);
     }
 
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
-    }
+    public static void handle(PacketInteractCard packet, Supplier<NetworkEvent.Context> ctx) {
 
-    public static void handle(PacketInteractCard packet, IPayloadContext ctx) {
+        ctx.get().enqueueWork(() -> {
 
-        ctx.enqueueWork(() -> {
-
-            ServerPlayer player = (ServerPlayer) ctx.player();
+            ServerPlayer player = ctx.get().getSender();
 
             if (player != null) {
 
@@ -49,5 +42,7 @@ public class PacketInteractCard implements CustomPacketPayload {
                 }
             }
         });
+
+        ctx.get().setPacketHandled(true);
     }
 }
