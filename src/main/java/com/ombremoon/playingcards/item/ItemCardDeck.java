@@ -2,7 +2,6 @@ package com.ombremoon.playingcards.item;
 
 import com.ombremoon.playingcards.entity.EntityCardDeck;
 import com.ombremoon.playingcards.item.base.ItemBase;
-import com.ombremoon.playingcards.main.PCReference;
 import com.ombremoon.playingcards.util.CardHelper;
 import com.ombremoon.playingcards.util.ItemHelper;
 import net.minecraft.ChatFormatting;

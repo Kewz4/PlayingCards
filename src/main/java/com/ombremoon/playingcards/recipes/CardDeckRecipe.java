@@ -1,6 +1,7 @@
 package com.ombremoon.playingcards.recipes;
 
 import com.ombremoon.playingcards.init.InitItems;
+import com.ombremoon.playingcards.init.InitRecipes;
 import com.ombremoon.playingcards.util.CardHelper;
 import com.ombremoon.playingcards.util.ItemHelper;
 import net.minecraft.core.HolderLookup;

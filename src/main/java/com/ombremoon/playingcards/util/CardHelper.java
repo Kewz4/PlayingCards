@@ -50,7 +50,7 @@ public class CardHelper {
         BakedModel model = itemRenderer.getModel(itemStack, level, null, 0);
         poseStack.pushPose();
         poseStack.translate(x, y, z);
-        itemRenderer.render(itemStack, ItemDisplayContext.GROUND, false, poseStack, buffer, packedLight, ItemRenderer.getFoilBufferDirect(buffer, model, 0, 0, false), model);
+        itemRenderer.render(itemStack, ItemDisplayContext.GROUND, false, poseStack, buffer, packedLight, 0, model);
         poseStack.popPose();
     }
 

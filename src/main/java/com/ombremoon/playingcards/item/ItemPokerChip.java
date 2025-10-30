@@ -3,7 +3,6 @@ package com.ombremoon.playingcards.item;
 import com.ombremoon.playingcards.entity.EntityPokerChip;
 import com.ombremoon.playingcards.init.InitItems;
 import com.ombremoon.playingcards.item.base.ItemBase;
-import com.ombremoon.playingcards.util.PCEntityTags;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;

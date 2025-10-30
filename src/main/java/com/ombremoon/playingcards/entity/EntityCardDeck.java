@@ -1,123 +1,140 @@
 package com.ombremoon.playingcards.entity;
 
 import com.ombremoon.playingcards.entity.base.EntityStacked;
+import com.ombremoon.playingcards.init.InitEntityTypes;
 import com.ombremoon.playingcards.init.InitItems;
-import com.ombremoon.playingcards.util.CardHelper;
+import com.ombremoon.playingcards.main.PCReference;
+import com.ombremoon.playingcards.util.ChatHelper;
+import com.ombremoon.playingcards.util.ItemHelper;
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.NetworkHooks;
 
 public class EntityCardDeck extends EntityStacked {
 
     private static final EntityDataAccessor<Float> ROTATION = SynchedEntityData.defineId(EntityCardDeck.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Byte> SKIN_ID = SynchedEntityData.defineId(EntityCardDeck.class, EntityDataSerializers.BYTE);
 
-    public EntityCardDeck(EntityType<?> p_20966_, Level p_20967_) {
-        super(p_20966_, p_20967_);
+    public EntityCardDeck(EntityType<? extends EntityCardDeck> type, Level world) {
+        super(type, world);
     }
 
-    public EntityCardDeck(Level world, Vec3 pos, float rotation, byte skinID) {
-        super(com.ombremoon.playingcards.init.InitEntityTypes.CARD_DECK.get(), world);
-        setPos(pos);
-        setRotation(rotation);
-        setSkinID(skinID);
-        setStack(CardHelper.createShuffledDeck());
-        updateCardCount();
-    }
+    public EntityCardDeck(Level world, Vec3 position, float rotation, byte skinID) {
+        super(InitEntityTypes.CARD_DECK.get(), world, position);
 
-    @Override
-    public InteractionResult interactAt(Player pPlayer, Vec3 pVec, InteractionHand pHand) {
+        createAndFillDeck();
+        shuffleStack();
 
-        if (!pPlayer.isShiftKeyDown() && !isStacked()) {
-            byte cardID = getStack()[0];
-            ejectItem(cardID);
-            EntityCard card = new EntityCard(level(), position().add(0, 0.1, 0), getRotation(), getSkinID(), new byte[]{cardID}, false);
-            card.setDeckUUID(getUUID());
-            level().addFreshEntity(card);
-            updateCardCount();
-            playSound(SoundEvents.WOOL_PLACE, 1.0F, 1.0F);
-        } else {
-            setRotation(getRotation() + CardHelper.getRotationAmount(pPlayer));
-        }
-
-        return InteractionResult.SUCCESS;
-    }
-
-    @Override
-    protected void onHit() {
-    }
-
-    @Override
-    public ItemStack getPickResult() {
-        ItemStack stack = new ItemStack(InitItems.CARD_DECK.get());
-        CompoundTag nbt = stack.getOrCreateTag();
-        nbt.putByte("SkinID", getSkinID());
-        return stack;
-    }
-
-    public void updateCardCount() {
-        if (getStack().length > 0) {
-            setCustomNameVisible(true);
-            setCustomName(CardHelper.getCardAmountComponent(getStack().length));
-        } else {
-            setCustomNameVisible(false);
-        }
-    }
-
-    @Override
-    protected void readAdditionalSaveData(CompoundTag pCompound) {
-        super.readAdditionalSaveData(pCompound);
-        setRotation(pCompound.getFloat("Rotation"));
-        setSkinID(pCompound.getByte("SkinID"));
-        updateCardCount();
-    }
-
-    @Override
-    protected void addAdditionalSaveData(CompoundTag pCompound) {
-        super.addAdditionalSaveData(pCompound);
-        pCompound.putFloat("Rotation", getRotation());
-        pCompound.putByte("SkinID", getSkinID());
-    }
-
-    @Override
-    protected void defineSynchedData(SynchedEntityData.Builder pBuilder) {
-        super.defineSynchedData(pBuilder);
-        pBuilder.define(ROTATION, 0F);
-        pBuilder.define(SKIN_ID, (byte) 0);
+        this.entityData.set(ROTATION, rotation);
+        this.entityData.set(SKIN_ID, skinID);
     }
 
     public float getRotation() {
         return this.entityData.get(ROTATION);
     }
 
-    public void setRotation(float rotation) {
-        this.entityData.set(ROTATION, rotation);
-    }
-
     public byte getSkinID() {
         return this.entityData.get(SKIN_ID);
     }
 
-    public void setSkinID(byte id) {
-        this.entityData.set(SKIN_ID, id);
+    private void createAndFillDeck() {
+
+        Byte[] newStack = new Byte[52];
+
+        for (byte index = 0; index < 52; index++) {
+            newStack[index] = index;
+        }
+
+        this.entityData.set(STACK, newStack);
     }
 
     @Override
-    public boolean isCustomNameVisible() {
-        return this.level().isClientSide && hasCustomName() && this.isCustomNameVisible();
+    public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
+        if (pHand == InteractionHand.MAIN_HAND) {
+
+            if (getStackAmount() > 0) {
+
+                int cardID = getTopStackID();
+
+                ItemStack card = new ItemStack(InitItems.CARD_COVERED.get());
+
+                card.setDamageValue(cardID);
+                ItemHelper.getNBT(card).putUUID("UUID", getUUID());
+                ItemHelper.getNBT(card).putByte("SkinID", this.entityData.get(SKIN_ID));
+                ItemHelper.getNBT(card).putBoolean("Covered", true);
+
+                if (!level().isClientSide) {
+                    ItemHelper.spawnStackAtEntity(level(), pPlayer, card);
+                }
+
+                removeFromTop();
+
+                return pPlayer.getMainHandItem().isEmpty() ? InteractionResult.SUCCESS : InteractionResult.FAIL;
+            }
+
+            else if (level().isClientSide) ChatHelper.printModMessage(ChatFormatting.RED, Component.translatable("message.stack_empty"), pPlayer);
+        }
+
+        return InteractionResult.FAIL;
     }
 
     @Override
-    public boolean isAttackable() {
+    public boolean hurt(DamageSource pSource, float pAmount) {
+        if (pSource.getDirectEntity() instanceof Player player) {
+
+            if (player.isCrouching()) {
+                ItemStack deck = new ItemStack(InitItems.CARD_DECK.get());
+                ItemHelper.getNBT(deck).putByte("SkinID", this.entityData.get(SKIN_ID));
+
+                ItemHelper.spawnStackAtEntity(level(), player, deck);
+                discard();
+            } else {
+                shuffleStack();
+                if (level().isClientSide) ChatHelper.printModMessage(ChatFormatting.GREEN, Component.translatable("message.stack_shuffled"), player);
+            }
+
+            return true;
+        }
+
         return false;
+    }
+
+    @Override
+    public void moreData() {
+        this.entityData.define(ROTATION, 0F);
+        this.entityData.define(SKIN_ID, (byte) 0);
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundTag compoundTag) {
+        super.readAdditionalSaveData(compoundTag);
+        this.entityData.set(ROTATION, compoundTag.getFloat("Rotation"));
+        this.entityData.set(SKIN_ID, compoundTag.getByte("SkinID"));
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundTag compoundTag) {
+        super.addAdditionalSaveData(compoundTag);
+        compoundTag.putFloat("Rotation", this.entityData.get(ROTATION));
+        compoundTag.putByte("SkinID", this.entityData.get(SKIN_ID));
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+        return NetworkHooks.getEntitySpawningPacket(this);
     }
 }
