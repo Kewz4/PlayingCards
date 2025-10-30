@@ -3,7 +3,6 @@ package com.ombremoon.playingcards.entity;
 import com.ombremoon.playingcards.entity.base.EntityStacked;
 import com.ombremoon.playingcards.init.InitItems;
 import com.ombremoon.playingcards.util.CardHelper;
-import com.ombremoon.playingcards.util.PCEntityTags;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -75,14 +74,6 @@ public class EntityCard extends EntityStacked {
 
     @Override
     public void onClientRemoval() {
-        super.onClientRemoval();
-
-        if (getDeckUUID() != null) {
-            EntityCardDeck deck = CardHelper.getDeckFromUUID(level(), getDeckUUID());
-            if (deck != null) {
-                deck.updateCardCount();
-            }
-        }
     }
 
     @Override

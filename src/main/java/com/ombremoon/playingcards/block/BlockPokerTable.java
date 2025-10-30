@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 public class BlockPokerTable extends BlockContainerBase {
     public static final MapCodec<BlockPokerTable> CODEC = simpleCodec(BlockPokerTable::new);
@@ -19,17 +20,17 @@ public class BlockPokerTable extends BlockContainerBase {
     }
 
     @Override
-    protected MapCodec<? extends BlockContainerBase> codec() {
+    protected @NotNull MapCodec<? extends BlockContainerBase> codec() {
         return CODEC;
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+    public BlockEntity newBlockEntity(@NotNull BlockPos pPos, @NotNull BlockState pState) {
         return new TileEntityPokerTable(pPos, pState);
     }
 
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level pLevel, @NotNull BlockState pState, @NotNull BlockEntityType<T> pBlockEntityType) {
         return createTickerHelper(pBlockEntityType, InitTileEntityTypes.POKER_TABLE.get(), TileEntityPokerTable::tick);
     }
 }

@@ -6,7 +6,6 @@ import com.ombremoon.playingcards.init.InitEntityTypes;
 import com.ombremoon.playingcards.init.InitModelOverrides;
 import com.ombremoon.playingcards.render.*;
 import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.minecraft.network.syncher.EntityDataSerializers;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -21,7 +20,7 @@ public class PlayingCards {
         modEventBus.addListener(this::onCommonSetup);
         modEventBus.addListener(this::onClientSetup);
         NeoForge.EVENT_BUS.register(this);
-        EntityDataSerializers.registerSerializer(PCDataSerializers.STACK);
+        PCDataSerializers.init();
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent event) {

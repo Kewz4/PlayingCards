@@ -1,8 +1,6 @@
 package com.ombremoon.playingcards.network;
 
-import com.ombremoon.playingcards.main.PCReference;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.registration.IPayloadRegistrar;

@@ -12,8 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.UUID;
-
 public class CardHelper {
     public static final String[] CARD_SKIN_NAMES = new String[]{"item.card.skin_default", "item.card.skin_red", "item.card.skin_blue"};
 
@@ -52,7 +50,7 @@ public class CardHelper {
         BakedModel model = itemRenderer.getModel(itemStack, level, null, 0);
         poseStack.pushPose();
         poseStack.translate(x, y, z);
-        itemRenderer.render(itemStack, ItemDisplayContext.GROUND, false, poseStack, buffer, packedLight, ItemRenderer.getOverlayCoords(itemStack, 0), model);
+        itemRenderer.render(itemStack, ItemDisplayContext.GROUND, false, poseStack, buffer, packedLight, ItemRenderer.getFoilBufferDirect(buffer, model, 0, 0, false), model);
         poseStack.popPose();
     }
 

@@ -2,6 +2,7 @@ package com.ombremoon.playingcards.event;
 
 import com.ombremoon.playingcards.item.ItemCardCovered;
 import com.ombremoon.playingcards.network.ModNetworking;
+import com.ombremoon.playingcards.network.PacketInteractCard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -31,7 +32,7 @@ public class CardInteractEvent {
                     if (heldStack.getItem() instanceof ItemCardCovered card) {
                         card.flipCard(heldStack, player);
 
-                        ModNetworking.cardInteract("flipinv");
+                        ModNetworking.sendToServer(new PacketInteractCard("flipinv"));
                         event.setCanceled(true);
                     }
                 }

@@ -14,6 +14,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -27,10 +28,10 @@ public class InitItems {
 
     //----- BLOCKS ------\\
 
-    public static final DeferredHolder<Block, BlockPokerTable> POKER_TABLE = BLOCKS.register("poker_table", BlockPokerTable::new);
+    public static final DeferredHolder<Block, BlockPokerTable> POKER_TABLE = BLOCKS.register("poker_table", () -> new BlockPokerTable(BlockBehaviour.Properties.of()));
     public static final DeferredHolder<Item, BlockItemBase> POKER_TABLE_ITEM = ITEMS.register("poker_table", () -> new BlockItemBase(POKER_TABLE.get()));
 
-    public static final DeferredHolder<Block, BlockBarStool> BAR_STOOL = BLOCKS.register("bar_stool", BlockBarStool::new);
+    public static final DeferredHolder<Block, BlockBarStool> BAR_STOOL = BLOCKS.register("bar_stool", () -> new BlockBarStool(BlockBehaviour.Properties.of()));
     public static final DeferredHolder<Item, BlockItemBase> BAR_STOOL_ITEM = ITEMS.register("bar_stool", () -> new BlockItemBase(BAR_STOOL.get()));
 
     //----- ITEMS ------\\

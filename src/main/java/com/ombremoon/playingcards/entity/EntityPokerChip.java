@@ -1,9 +1,7 @@
 package com.ombremoon.playingcards.entity;
 
 import com.ombremoon.playingcards.entity.base.EntityStacked;
-import com.ombremoon.playingcards.init.InitItems;
 import com.ombremoon.playingcards.item.ItemPokerChip;
-import com.ombremoon.playingcards.util.PCEntityTags;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;

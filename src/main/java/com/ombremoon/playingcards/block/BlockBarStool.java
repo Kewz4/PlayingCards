@@ -24,7 +24,7 @@ public class BlockBarStool extends BlockBase {
     }
 
     @Override
-    protected MapCodec<? extends BlockBase> codec() {
+    protected MapCodec<? extends Block> codec() {
         return CODEC;
     }
 
@@ -34,7 +34,7 @@ public class BlockBarStool extends BlockBase {
     }
 
     @Override
-    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+    protected InteractionResult useWithoutItem(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, BlockHitResult pHit) {
         return EntitySeat.create(pLevel, pPos.getX() + 0.5D, pPos.getY() + 0.5D, pPos.getZ() + 0.5D, pPlayer) ? InteractionResult.SUCCESS : InteractionResult.FAIL;
     }
 }
