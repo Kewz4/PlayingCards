@@ -1,28 +1,27 @@
 package com.ombremoon.playingcards.item;
 
 import com.ombremoon.playingcards.entity.EntityDice;
+import com.ombremoon.playingcards.init.InitEntityTypes;
 import com.ombremoon.playingcards.item.base.ItemBase;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public class ItemDice extends ItemBase {
-
-    public ItemDice() {
-        super(new Item.Properties().stacksTo(5));
+    public ItemDice(Properties pProperties) {
+        super(pProperties);
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
-        ItemStack stack = pPlayer.getItemInHand(pUsedHand);
-
-        EntityDice cardDeck = new EntityDice(pLevel, pPlayer.position(), pPlayer.getYRot());
-        pLevel.addFreshEntity(cardDeck);
-        stack.shrink(1);
-
-        return InteractionResultHolder.success(stack);
+        ItemStack itemstack = pPlayer.getItemInHand(pUsedHand);
+        if (!pLevel.isClientSide) {
+            EntityDice dice = new EntityDice(InitEntityTypes.DICE.get(), pLevel);
+            dice.setPos(pPlayer.position());
+            pLevel.addFreshEntity(dice);
+        }
+        return InteractionResultHolder.sidedSuccess(itemstack, pLevel.isClientSide());
     }
 }
