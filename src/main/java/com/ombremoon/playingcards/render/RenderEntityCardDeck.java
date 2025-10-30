@@ -25,9 +25,8 @@ public class RenderEntityCardDeck extends EntityRenderer<EntityCardDeck> {
         ItemStack card = new ItemStack(InitItems.CARD_COVERED.get());
 
         pPoseStack.pushPose();
-        pPoseStack.translate(0, 0.5, 0);
+        pPoseStack.translate(0, 0.005, 0);
         pPoseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(pEntity.getRotation()));
-        pPoseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(90));
         pPoseStack.scale(0.5f, 0.5f, 0.5f);
 
         for (byte i = 0; i < pEntity.getStack().length + 2; i++) {

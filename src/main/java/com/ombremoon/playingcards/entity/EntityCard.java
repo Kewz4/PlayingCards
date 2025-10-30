@@ -61,6 +61,24 @@ public class EntityCard extends EntityStacked {
             } else {
                 setRotation(getRotation() + CardHelper.getRotationAmount(pPlayer));
             }
+        } else {
+            if (!this.level().isClientSide) {
+                byte topCard = this.getStack()[this.getStack().length - 1];
+                ItemStack cardStack = new ItemStack(isCovered() ? InitItems.CARD_COVERED.get() : InitItems.CARD.get());
+                if (!isCovered()) {
+                    cardStack.setDamageValue(topCard);
+                }
+                pPlayer.addItem(cardStack);
+
+                byte[] newStack = new byte[this.getStack().length - 1];
+                System.arraycopy(this.getStack(), 0, newStack, 0, newStack.length);
+                this.setStack(newStack);
+
+                if (this.getStack().length == 0) {
+                    this.discard();
+                }
+            }
+            return InteractionResult.SUCCESS;
         }
         return InteractionResult.SUCCESS;
     }
@@ -69,6 +87,8 @@ public class EntityCard extends EntityStacked {
     protected void onHit() {
         if (isStacked()) {
             ejectItems();
+        } else {
+            setCovered(!isCovered());
         }
     }
 

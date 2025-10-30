@@ -37,13 +37,9 @@ public class BlockPokerTable extends BlockContainerBase {
     }
 
     @Override
-    public void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
-        super.onPlace(pState, pLevel, pPos, pOldState, pIsMoving);
-        if (!pLevel.isClientSide) {
-            pLevel.setBlock(pPos, getState(pState, pLevel, pPos), 2);
-        }
+    public BlockState updateShape(BlockState pState, net.minecraft.core.Direction pFacing, BlockState pFacingState, net.minecraft.world.level.LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pFacingPos) {
+        return getState(pState, (Level) pLevel, pCurrentPos);
     }
-
 
     @Nullable
     @Override

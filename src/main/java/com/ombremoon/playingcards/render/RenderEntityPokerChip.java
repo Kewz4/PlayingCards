@@ -26,16 +26,15 @@ public class RenderEntityPokerChip extends EntityRenderer<EntityPokerChip> {
     @Override
     public void render(EntityPokerChip pEntity, float pEntityYaw, float pPartialTicks, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
         pPoseStack.pushPose();
-        pPoseStack.translate(0, 0.5, 0);
+        pPoseStack.translate(0, 0.005, 0);
         pPoseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(pEntityYaw));
-        pPoseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(90));
         pPoseStack.scale(0.5f, 0.5f, 0.5f);
 
         for (byte i = 0; i < pEntity.getStack().length; i++) {
             pPoseStack.pushPose();
             random.setSeed(pEntity.getId() + i);
-            pPoseStack.translate(random.nextFloat() * 0.1 - 0.05, i * -0.01, random.nextFloat() * 0.1 - 0.05);
-            CardHelper.renderItem(new ItemStack(ItemPokerChip.getItemFromID(pEntity.getStack()[i])), pEntity.level(), 0, 0, i * 0.032D, pPoseStack, pBuffer, pPackedLight);
+            pPoseStack.translate(random.nextFloat() * 0.1 - 0.05, i * 0.1, random.nextFloat() * 0.1 - 0.05);
+            CardHelper.renderItem(new ItemStack(ItemPokerChip.getItemFromID(pEntity.getStack()[i])), pEntity.level(), 0, 0, 0, pPoseStack, pBuffer, pPackedLight);
             pPoseStack.popPose();
         }
 

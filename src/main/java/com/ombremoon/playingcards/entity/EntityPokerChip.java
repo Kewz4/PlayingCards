@@ -36,6 +36,18 @@ public class EntityPokerChip extends EntityStacked {
 
     @Override
     public InteractionResult interactAt(Player pPlayer, Vec3 pVec, InteractionHand pHand) {
+        ItemStack heldItem = pPlayer.getItemInHand(pHand);
+
+        if (!heldItem.isEmpty() && heldItem.getItem() instanceof ItemPokerChip) {
+            if (!this.level().isClientSide) {
+                byte[] heldStack = new byte[]{((ItemPokerChip) heldItem.getItem()).getChipID()};
+                this.setStack(com.ombremoon.playingcards.util.CardHelper.combine(this.getStack(), heldStack));
+                heldItem.shrink(1);
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+
         if (pPlayer.isShiftKeyDown()) {
             if (!this.level().isClientSide) {
                 if (getOwnerUUID() != null && (pPlayer.getUUID().equals(getOwnerUUID()) || pPlayer.hasPermissions(2))) {

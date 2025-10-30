@@ -32,7 +32,7 @@ public class ItemPokerChip extends ItemBase {
     @Override
     public InteractionResult useOn(UseOnContext pContext) {
         if (!pContext.getLevel().isClientSide) {
-            EntityPokerChip pokerChip = new EntityPokerChip(pContext.getLevel(), pContext.getClickLocation(), new byte[]{getColorID()});
+            EntityPokerChip pokerChip = new EntityPokerChip(pContext.getLevel(), pContext.getClickLocation(), new byte[]{getChipID()});
             pContext.getLevel().addFreshEntity(pokerChip);
             pContext.getItemInHand().shrink(1);
             return InteractionResult.SUCCESS;
@@ -40,7 +40,7 @@ public class ItemPokerChip extends ItemBase {
         return InteractionResult.CONSUME;
     }
 
-    public byte getColorID() {
+    public byte getChipID() {
         return colorID;
     }
 
