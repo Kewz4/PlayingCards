@@ -3,71 +3,58 @@ package com.ombremoon.playingcards.util;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public class CardHelper {
+    public static final String[] CARD_SKIN_NAMES = new String[]{"item.card.skin_default", "item.card.skin_red", "item.card.skin_blue"};
 
-    public static final String[] CARD_SKIN_NAMES = {"card.skin.blue", "card.skin.red", "card.skin.black", "card.skin.pig"};
+    public static byte[] createShuffledDeck() {
+        byte[] deck = new byte[52];
+        for (byte i = 0; i < 52; i++) {
+            deck[i] = i;
+        }
 
-    public static void renderItem(ItemStack stack, Level level, double offsetX, double offsetY, double offsetZ, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight) {
-        matrixStack.pushPose();
-        matrixStack.translate(offsetX, offsetY, offsetZ);
-        var renderer = Minecraft.getInstance().getItemRenderer();
-        BakedModel model = renderer.getModel(stack, level, null, 0);
-        renderer.render(stack, ItemDisplayContext.GROUND, false, matrixStack, buffer, combinedLight, OverlayTexture.NO_OVERLAY, model);
-        matrixStack.popPose();
+        for (int i = 0; i < deck.length; i++) {
+            int randomIndex = (int) (Math.random() * deck.length);
+            byte temp = deck[i];
+            deck[i] = deck[randomIndex];
+            deck[randomIndex] = temp;
+        }
+        return deck;
     }
 
-    public static MutableComponent getCardName(int id) {
+    public static byte[] combine(byte[] a, byte[] b) {
+        byte[] result = new byte[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
 
-        String type = "card.ace";
+    public static float getRotationAmount(Player pPlayer) {
+        Vec3 lookVec = pPlayer.getLookAngle();
+        double x = lookVec.x;
+        double z = lookVec.z;
+        float rotation = (float) (Math.atan2(x, z) * (180 / Math.PI));
+        return (float) (Math.round(rotation / 45.0) * 45.0);
+    }
 
-        int typeID = id / 4 + 1;
+    public static void renderItem(ItemStack itemStack, Level level, double x, double y, double z, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+        ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+        BakedModel model = itemRenderer.getModel(itemStack, level, null, 0);
+        poseStack.pushPose();
+        poseStack.translate(x, y, z);
+        itemRenderer.render(itemStack, ItemDisplayContext.GROUND, false, poseStack, buffer, packedLight, 0, model);
+        poseStack.popPose();
+    }
 
-        if (typeID > 1 && typeID < 11) {
-            type = "" + typeID;
-        }
-
-        if (typeID > 10) {
-            type = "card.jack";
-
-            if (typeID > 11) {
-                type = "card.queen";
-
-                if (typeID > 12) {
-                    type = "card.king";
-                }
-            }
-        }
-
-        String suite = "card.spades";
-
-        int suiteID = id % 4;
-
-        switch(suiteID) {
-
-            case 1: {
-                suite = "card.clubs";
-                break;
-            }
-
-            case 2: {
-                suite = "card.diamonds";
-                break;
-            }
-
-            case 3: {
-                suite = "card.hearts";
-                break;
-            }
-        }
-
-        return Component.translatable(type).append(" ").append(Component.translatable("card.of").append(" ").append(Component.translatable(suite)));
+    public static Component getCardAmountComponent(int amount) {
+        return Component.literal(String.valueOf(amount));
     }
 }

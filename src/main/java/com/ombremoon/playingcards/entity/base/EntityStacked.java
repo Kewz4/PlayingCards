@@ -1,137 +1,87 @@
 package com.ombremoon.playingcards.entity.base;
 
 import com.ombremoon.playingcards.entity.data.PCDataSerializers;
-import com.ombremoon.playingcards.main.PCReference;
-import com.ombremoon.playingcards.util.ArrayHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 public abstract class EntityStacked extends Entity {
+    private static final EntityDataAccessor<byte[]> STACK = SynchedEntityData.defineId(EntityStacked.class, PCDataSerializers.STACK);
 
-    public static final byte MAX_STACK_SIZE = 52;
-
-    protected static final EntityDataAccessor<Byte[]> STACK = SynchedEntityData.defineId(EntityStacked.class, PCDataSerializers.STACK);
-
-    public EntityStacked(EntityType<? extends EntityStacked> type, Level world) {
-        super(type, world);
+    public EntityStacked(EntityType<?> p_20966_, Level p_20967_) {
+        super(p_20966_, p_20967_);
     }
 
-    public EntityStacked(EntityType<? extends EntityStacked> type, Level world, Vec3 position) {
-        this(type, world);
-        setPos(position.x, position.y, position.z);
-        setRot(0, 0);
+    protected abstract void onHit();
+
+    public boolean isStacked() {
+        return getStack().length > 1;
     }
 
-    public int getStackAmount() {
-        return this.entityData.get(STACK).length;
-    }
-
-    public byte getTopStackID() {
-        return getIDAt(getStackAmount() - 1);
-    }
-
-    public byte getIDAt(int index) {
-
-        if (index >= 0 && index < getStackAmount()) {
-            return this.entityData.get(STACK)[index];
+    public void ejectItems() {
+        if (!this.level().isClientSide) {
+            for (byte b : getStack()) {
+                ejectItem(b);
+            }
+            this.discard();
         }
-
-        return 0;
     }
 
-    public void removeFromTop() {
-        Byte[] newStack = new Byte[getStackAmount() - 1];
-
-        for (int index = 0; index < newStack.length; index++) {
-            newStack[index] = this.entityData.get(STACK)[index];
+    public void ejectItem(byte cardID) {
+        if (!this.level().isClientSide) {
+            ItemStack stack = getPickResult();
+            stack.setDamageValue(cardID);
+            ItemEntity itemEntity = new ItemEntity(this.level(), getX(), getY(), getZ(), stack);
+            itemEntity.setDefaultPickUpDelay();
+            this.level().addFreshEntity(itemEntity);
+            removeStack(cardID);
         }
-
-        this.entityData.set(STACK, newStack);
-    }
-
-    public void addToTop(byte id) {
-
-        Byte[] newStack = new Byte[getStackAmount() + 1];
-
-        for (int index = 0; index < getStackAmount(); index++) {
-            newStack[index] = this.entityData.get(STACK)[index];
-        }
-
-        newStack[newStack.length - 1] = id;
-
-        this.entityData.set(STACK, newStack);
-    }
-
-    public void createStack() {
-        Byte[] newStack = new Byte[0];
-        this.entityData.set(STACK, newStack);
-    }
-
-    public void shuffleStack() {
-
-        Byte[] newStack = new Byte[getStackAmount()];
-
-        for (int index = 0; index < getStackAmount(); index++) {
-            newStack[index] = this.entityData.get(STACK)[index];
-        }
-
-        ArrayHelper.shuffle(newStack);
-
-        this.entityData.set(STACK, newStack);
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    protected void readAdditionalSaveData(CompoundTag pCompound) {
+        setStack(pCompound.getByteArray("Stack"));
+    }
 
-        if (level().isClientSide) {
-            noPhysics = false;
-        } else {
-            noPhysics = !level().noCollision(this);
+    @Override
+    protected void addAdditionalSaveData(CompoundTag pCompound) {
+        pCompound.putByteArray("Stack", getStack());
+    }
 
-            if (noPhysics) {
-                setDeltaMovement(getDeltaMovement().add(0.0D, 0.02D, 0.0D));
-            } else {
-                setDeltaMovement(getDeltaMovement().add(0.0D, -0.04D, 0.0D));
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder pBuilder) {
+        pBuilder.define(STACK, new byte[0]);
+    }
+
+    public byte[] getStack() {
+        return this.entityData.get(STACK);
+    }
+
+    public void setStack(byte[] stack) {
+        this.entityData.set(STACK, stack);
+    }
+
+    public void addStack(byte value) {
+        byte[] newStack = new byte[getStack().length + 1];
+        System.arraycopy(getStack(), 0, newStack, 0, getStack().length);
+        newStack[getStack().length] = value;
+        setStack(newStack);
+    }
+
+    public void removeStack(byte value) {
+        byte[] newStack = new byte[getStack().length - 1];
+        int i = 0;
+        for (byte b : getStack()) {
+            if (b != value) {
+                newStack[i] = b;
+                i++;
             }
         }
-
-        move(MoverType.SELF, getDeltaMovement());
-
-        Vec3 pos = position();
-        double size = 0.2D;
-        double addAmount = 0.0045D;
-
-        setBoundingBox(new AABB(pos.x - size, pos.y, pos.z - size, pos.x + size, pos.y + 0.03D + (addAmount * getStackAmount()), pos.z + size));
-    }
-
-    public abstract void moreData();
-
-    @Override
-    protected void defineSynchedData() {
-        this.entityData.define(STACK, new Byte[0]);
-        moreData();
-    }
-
-    @Override
-    protected void readAdditionalSaveData(CompoundTag compoundTag) {
-        this.entityData.set(STACK, ArrayHelper.toObject(compoundTag.getByteArray("Stack")));
-    }
-
-    @Override
-    protected void addAdditionalSaveData(CompoundTag compoundTag) {
-        compoundTag.putByteArray("Stack", ArrayHelper.toPrimitive(this.entityData.get(STACK)));
-    }
-
-    @Override
-    public boolean isPickable() {
-        return true;
+        setStack(newStack);
     }
 }

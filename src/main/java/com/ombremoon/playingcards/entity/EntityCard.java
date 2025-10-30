@@ -1,32 +1,21 @@
 package com.ombremoon.playingcards.entity;
 
 import com.ombremoon.playingcards.entity.base.EntityStacked;
-import com.ombremoon.playingcards.init.InitEntityTypes;
 import com.ombremoon.playingcards.init.InitItems;
-import com.ombremoon.playingcards.item.ItemCardCovered;
-import com.ombremoon.playingcards.util.ChatHelper;
-import com.ombremoon.playingcards.util.ItemHelper;
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
+import com.ombremoon.playingcards.util.CardHelper;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkHooks;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,138 +26,133 @@ public class EntityCard extends EntityStacked {
     private static final EntityDataAccessor<Optional<UUID>> DECK_UUID = SynchedEntityData.defineId(EntityCard.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<Boolean> COVERED = SynchedEntityData.defineId(EntityCard.class, EntityDataSerializers.BOOLEAN);
 
-    public EntityCard(EntityType<? extends EntityCard> type, Level world) {
-        super(type, world);
+    public EntityCard(EntityType<?> p_20966_, Level p_20967_) {
+        super(p_20966_, p_20967_);
     }
 
-    public EntityCard(Level world, Vec3 position, float rotation, byte skinID, UUID deckUUID, boolean covered, byte firstCardID) {
-        super(InitEntityTypes.CARD.get(), world, position);
+    public EntityCard(Level world, Vec3 pos, float rotation, byte skinID, byte[] stack, boolean isCovered) {
+        super(com.ombremoon.playingcards.init.InitEntityTypes.CARD.get(), world);
+        setPos(pos);
+        setRotation(rotation);
+        setSkinID(skinID);
+        setStack(stack);
+        setCovered(isCovered);
+    }
 
-        createStack();
-        addToTop(firstCardID);
-        this.entityData.set(ROTATION, rotation);
-        this.entityData.set(SKIN_ID, skinID);
-        this.entityData.set(DECK_UUID, Optional.of(deckUUID));
-        this.entityData.set(COVERED, covered);
+    @Override
+    public InteractionResult interactAt(Player pPlayer, Vec3 pVec, InteractionHand pHand) {
+        if (!isStacked()) {
+            if (pPlayer.isShiftKeyDown()) {
+                setCovered(!isCovered());
+            } else {
+                setRotation(getRotation() + CardHelper.getRotationAmount(pPlayer));
+            }
+        }
+        return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    protected void onHit() {
+        if (isStacked()) {
+            ejectItems();
+        }
+    }
+
+    @Override
+    public ItemStack getPickResult() {
+        ItemStack stack = new ItemStack(isCovered() ? InitItems.CARD_COVERED.get() : InitItems.CARD.get());
+
+        if (!isCovered()) {
+            stack.setDamageValue(getStack()[0]);
+        }
+
+        CompoundTag nbt = stack.getOrCreateTag();
+        nbt.putByte("SkinID", getSkinID());
+
+        return stack;
+    }
+
+    @Override
+    public void onClientRemoval() {
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        setRotation(pCompound.getFloat("Rotation"));
+        setSkinID(pCompound.getByte("SkinID"));
+        setCovered(pCompound.getBoolean("IsCovered"));
+
+        if (pCompound.contains("DeckUUID", Tag.TAG_INT_ARRAY)) {
+            setDeckUUID(pCompound.getUUID("DeckUUID"));
+        }
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putFloat("Rotation", getRotation());
+        pCompound.putByte("SkinID", getSkinID());
+        pCompound.putBoolean("IsCovered", isCovered());
+
+        if (getDeckUUID() != null) {
+            pCompound.putUUID("DeckUUID", getDeckUUID());
+        }
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder pBuilder) {
+        super.defineSynchedData(pBuilder);
+        pBuilder.define(ROTATION, 0F);
+        pBuilder.define(SKIN_ID, (byte) 0);
+        pBuilder.define(DECK_UUID, Optional.empty());
+        pBuilder.define(COVERED, false);
     }
 
     public float getRotation() {
         return this.entityData.get(ROTATION);
     }
 
+    public void setRotation(float rotation) {
+        this.entityData.set(ROTATION, rotation);
+    }
+
     public byte getSkinID() {
         return this.entityData.get(SKIN_ID);
     }
 
-    public UUID getDeckUUID() {
-        return (this.entityData.get(DECK_UUID).isPresent()) ? this.entityData.get(DECK_UUID).get() : null;
+    public void setSkinID(byte id) {
+        this.entityData.set(SKIN_ID, id);
     }
 
-    public boolean isCover() {
+    public UUID getDeckUUID() {
+        return this.entityData.get(DECK_UUID).orElse(null);
+    }
+
+    public void setDeckUUID(UUID uuid) {
+        this.entityData.set(DECK_UUID, Optional.of(uuid));
+    }
+
+    public boolean isCovered() {
         return this.entityData.get(COVERED);
     }
 
-    private void takeCard(Player player) {
-
-        ItemStack card = new ItemStack(InitItems.CARD.get());
-        if (this.entityData.get(COVERED)) card = new ItemStack(InitItems.CARD_COVERED.get());
-
-        card.setDamageValue(getTopStackID());
-        ItemHelper.getNBT(card).putUUID("UUID", getDeckUUID());
-        ItemHelper.getNBT(card).putByte("SkinID", this.entityData.get(SKIN_ID));
-        ItemHelper.getNBT(card).putBoolean("Covered", this.entityData.get(COVERED));
-
-        if (!level().isClientSide) {
-            ItemHelper.spawnStackAtEntity(level(), player, card);
-        }
-
-        removeFromTop();
-
-        if (getStackAmount() <= 0) {
-            discard();
-        }
+    public void setCovered(boolean isCovered) {
+        this.entityData.set(COVERED, isCovered);
     }
 
     @Override
-    public void tick() {
-        super.tick();
-
-        if (level().getGameTime() % 20 == 0) {
-
-            BlockPos pos = blockPosition();
-
-            List<EntityCardDeck> closeDecks = level().getEntitiesOfClass(EntityCardDeck.class, new AABB(pos.getX() - 20, pos.getY() - 20, pos.getZ() - 20, pos.getX() + 20, pos.getY() + 20, pos.getZ() + 20));
-
-            boolean foundParentDeck = false;
-
-            for (EntityCardDeck closeDeck : closeDecks) {
-
-                if (getDeckUUID().equals(closeDeck.getUUID())) {
-                    foundParentDeck = true;
-                }
-            }
-
-            if (!foundParentDeck) discard();
-
-            super.onRemovedFromWorld();
-        }
+    public boolean isCustomNameVisible() {
+        return isStacked() && !this.level().isClientSide && hasCustomName() && this.isCustomNameVisible();
     }
 
     @Override
-    public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
-        ItemStack stack = pPlayer.getItemInHand(pHand);
-
-        if (stack.getItem() instanceof ItemCardCovered) {
-
-            if (getStackAmount() < MAX_STACK_SIZE) {
-                addToTop((byte) stack.getDamageValue());
-                stack.shrink(1);
-            }
-
-            else {
-                if (level().isClientSide) ChatHelper.printModMessage(ChatFormatting.RED, Component.translatable("message.stack_full"), pPlayer);
-            }
-        }
-
-        else takeCard(pPlayer);
-
-        return InteractionResult.SUCCESS;
+    public boolean isAttackable() {
+        return false;
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        this.entityData.set(COVERED, !this.entityData.get(COVERED));
-        return true;
-    }
-
-    @Override
-    public void moreData() {
-        this.entityData.define(ROTATION, 0F);
-        this.entityData.define(SKIN_ID, (byte) 0);
-        this.entityData.define(DECK_UUID, Optional.empty());
-        this.entityData.define(COVERED, false);
-    }
-
-    @Override
-    protected void readAdditionalSaveData(CompoundTag compoundTag) {
-        super.readAdditionalSaveData(compoundTag);
-        this.entityData.set(ROTATION, compoundTag.getFloat("Rotation"));
-        this.entityData.set(SKIN_ID, compoundTag.getByte("SkinID"));
-        this.entityData.set(DECK_UUID, Optional.of(compoundTag.getUUID("DeckID")));
-        this.entityData.set(COVERED, compoundTag.getBoolean("Covered"));
-    }
-
-    @Override
-    protected void addAdditionalSaveData(CompoundTag compoundTag) {
-        super.addAdditionalSaveData(compoundTag);
-        compoundTag.putFloat("Rotation", this.entityData.get(ROTATION));
-        compoundTag.putByte("SkinID", this.entityData.get(SKIN_ID));
-        compoundTag.putUUID("DeckID", getDeckUUID());
-        compoundTag.putBoolean("Covered", this.entityData.get(COVERED));
-    }
-
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
+    public boolean canBeHitByProjectile() {
+        return isStacked() && super.canBeHitByProjectile();
     }
 }

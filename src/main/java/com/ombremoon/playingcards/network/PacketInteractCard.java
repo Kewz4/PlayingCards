@@ -1,14 +1,16 @@
 package com.ombremoon.playingcards.network;
 
-import net.minecraft.network.FriendlyByteBuf;
 import com.ombremoon.playingcards.item.ItemCardCovered;
+import com.ombremoon.playingcards.main.PCReference;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
-
-public class PacketInteractCard {
+public class PacketInteractCard implements CustomPacketPayload {
+    public static final Type<PacketInteractCard> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(PCReference.MOD_ID, "interact_card"));
     private final String command;
 
     public PacketInteractCard (String command) {
@@ -19,22 +21,22 @@ public class PacketInteractCard {
         command = buf.readUtf(11).trim();
     }
 
-    public void encode(FriendlyByteBuf buf) {
+    @Override
+    public void write(FriendlyByteBuf buf) {
         buf.writeUtf(command, 11);
     }
 
-    public static void handle(PacketInteractCard packet, Supplier<NetworkEvent.Context> ctx) {
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
 
-        ctx.get().enqueueWork(() -> {
-
-            ServerPlayer player = ctx.get().getSender();
-
+    public static void handle(PacketInteractCard packet, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            ServerPlayer player = (ServerPlayer) ctx.player();
             if (player != null) {
-
                 if (packet.command.equalsIgnoreCase("flipinv")) {
-
                     Item item = player.getMainHandItem().getItem();
-
                     if (item instanceof ItemCardCovered) {
                         ItemCardCovered card = (ItemCardCovered)player.getMainHandItem().getItem();
                         card.flipCard(player.getMainHandItem(), player);
@@ -42,7 +44,5 @@ public class PacketInteractCard {
                 }
             }
         });
-
-        ctx.get().setPacketHandled(true);
     }
 }

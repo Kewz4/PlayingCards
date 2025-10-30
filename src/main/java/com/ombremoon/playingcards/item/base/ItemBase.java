@@ -2,12 +2,8 @@ package com.ombremoon.playingcards.item.base;
 
 import net.minecraft.world.item.Item;
 
-/**
- * The base class for Items.
- */
 public class ItemBase extends Item {
-
-    public ItemBase(Properties pProperties) {
-        super(pProperties);
+    public ItemBase(Properties p_41383_) {
+        super(p_41383_);
     }
 }
