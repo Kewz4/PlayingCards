@@ -23,7 +23,7 @@ public class PlayingCards {
         InitEntityTypes.init(modEventBus);
         InitTileEntityTypes.init(modEventBus);
         InitRecipes.init(modEventBus);
-        PCDataSerializers.init();
+        PCDataSerializers.init(modEventBus);
 
         modEventBus.addListener(this::onCommonSetup);
         modEventBus.addListener(this::onClientSetup);

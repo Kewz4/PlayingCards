@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public abstract class EntityStacked extends Entity {
-    private static final EntityDataAccessor<byte[]> STACK = SynchedEntityData.defineId(EntityStacked.class, PCDataSerializers.STACK);
+    private static final EntityDataAccessor<byte[]> STACK = SynchedEntityData.defineId(EntityStacked.class, PCDataSerializers.STACK.get());
 
     public EntityStacked(EntityType<?> p_20966_, Level p_20967_) {
         super(p_20966_, p_20967_);
