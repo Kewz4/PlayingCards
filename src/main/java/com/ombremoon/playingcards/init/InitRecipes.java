@@ -7,13 +7,13 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 public class InitRecipes {
 
     public static final DeferredRegister<RecipeSerializer<?>> RECIPES = DeferredRegister.create(Registries.RECIPE_SERIALIZER, PCReference.MOD_ID);
 
-    public static final RegistryObject<RecipeSerializer<CardDeckRecipe>> DECK = RECIPES.register("deck", () -> new SimpleCraftingRecipeSerializer<>(CardDeckRecipe::new));
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<CardDeckRecipe>> DECK = RECIPES.register("deck", () -> new SimpleCraftingRecipeSerializer<>(CardDeckRecipe::new));
 
     public static void init(IEventBus modEventBus) {
         RECIPES.register(modEventBus);

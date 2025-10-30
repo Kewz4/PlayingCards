@@ -4,7 +4,6 @@ import com.ombremoon.playingcards.entity.data.PCDataSerializers;
 import com.ombremoon.playingcards.event.CardInteractEvent;
 import com.ombremoon.playingcards.init.InitEntityTypes;
 import com.ombremoon.playingcards.init.InitModelOverrides;
-import com.ombremoon.playingcards.network.ModNetworking;
 import com.ombremoon.playingcards.render.*;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -26,7 +25,6 @@ public class PlayingCards {
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent event) {
-        ModNetworking.registerPackets();
         NeoForge.EVENT_BUS.register(new CardInteractEvent());
     }
 

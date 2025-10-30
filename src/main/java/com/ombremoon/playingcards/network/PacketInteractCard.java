@@ -1,15 +1,16 @@
 package com.ombremoon.playingcards.network;
 
 import com.ombremoon.playingcards.item.ItemCardCovered;
-import com.ombremoon.playingcards.main.CommonClass;
+import com.ombremoon.playingcards.main.PCReference;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class PacketInteractCard implements CustomPacketPayload {
-    public static final CustomPacketPayload.Type<PacketInteractCard> TYPE = new CustomPacketPayload.Type<>(CommonClass.customLocation("interact_card"));
+    public static final Type<PacketInteractCard> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(PCReference.MOD_ID, "interact_card"));
     private final String command;
 
     public PacketInteractCard (String command) {
@@ -31,17 +32,11 @@ public class PacketInteractCard implements CustomPacketPayload {
     }
 
     public static void handle(PacketInteractCard packet, IPayloadContext ctx) {
-
         ctx.enqueueWork(() -> {
-
             ServerPlayer player = (ServerPlayer) ctx.player();
-
             if (player != null) {
-
                 if (packet.command.equalsIgnoreCase("flipinv")) {
-
                     Item item = player.getMainHandItem().getItem();
-
                     if (item instanceof ItemCardCovered) {
                         ItemCardCovered card = (ItemCardCovered)player.getMainHandItem().getItem();
                         card.flipCard(player.getMainHandItem(), player);

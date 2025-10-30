@@ -1,26 +1,11 @@
 package com.ombremoon.playingcards.entity.data;
 
-import com.ombremoon.playingcards.util.ArrayHelper;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.syncher.EntityDataSerializer;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+
+import java.util.function.Function;
 
 public class PCDataSerializers {
-
-    public static final EntityDataSerializer<Byte[]> STACK = new EntityDataSerializer<>() {
-
-        @Override
-        public void write(FriendlyByteBuf friendlyByteBuf, Byte[] bytes) {
-            friendlyByteBuf.writeByteArray(ArrayHelper.toPrimitive(bytes));
-        }
-
-        @Override
-        public Byte[] read(FriendlyByteBuf friendlyByteBuf) {
-            return ArrayHelper.toObject(friendlyByteBuf.readByteArray());
-        }
-
-        @Override
-        public Byte[] copy(Byte[] bytes) {
-            return ArrayHelper.clone(bytes);
-        }
-    };
+    public static final StreamCodec<ByteBuf, byte[]> STACK = ByteBufCodecs.BYTE_ARRAY;
 }

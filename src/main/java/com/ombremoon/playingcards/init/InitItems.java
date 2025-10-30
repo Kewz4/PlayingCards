@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 public class InitItems {
 
@@ -26,33 +27,28 @@ public class InitItems {
 
     //----- BLOCKS ------\\
 
-    public static final RegistryObject<Block> POKER_TABLE = BLOCKS.register("poker_table", BlockPokerTable::new);
-    public static final RegistryObject<Item> POKER_TABLE_ITEM = ITEMS.register("poker_table", () -> new BlockItemBase(POKER_TABLE.get()));
+    public static final DeferredHolder<Block, BlockPokerTable> POKER_TABLE = BLOCKS.register("poker_table", BlockPokerTable::new);
+    public static final DeferredHolder<Item, BlockItemBase> POKER_TABLE_ITEM = ITEMS.register("poker_table", () -> new BlockItemBase(POKER_TABLE.get()));
 
-    public static final RegistryObject<Block> BAR_STOOL = BLOCKS.register("bar_stool", BlockBarStool::new);
-    public static final RegistryObject<Item> BAR_STOOL_ITEM = ITEMS.register("bar_stool", () -> new BlockItemBase(BAR_STOOL.get()));
-
-    //public static final RegistryObject<Block> CASINO_CARPET_SPACE = BLOCKS.register("casino_carpet_space", BlockCasinoCarpet::new);
-    //public static final RegistryObject<Item> CASINO_CARPET_SPACE_ITEM = ITEMS.register("casino_carpet_space", () -> new BlockItemBase(CASINO_CARPET_SPACE.get()));
+    public static final DeferredHolder<Block, BlockBarStool> BAR_STOOL = BLOCKS.register("bar_stool", BlockBarStool::new);
+    public static final DeferredHolder<Item, BlockItemBase> BAR_STOOL_ITEM = ITEMS.register("bar_stool", () -> new BlockItemBase(BAR_STOOL.get()));
 
     //----- ITEMS ------\\
 
-    public static final RegistryObject<Item> CARD_DECK = ITEMS.register("card_deck", ItemCardDeck::new);
-    public static final RegistryObject<Item> CARD_COVERED = ITEMS.register("card_covered", ItemCardCovered::new);
-    public static final RegistryObject<Item> CARD = ITEMS.register("card", ItemCard::new);
+    public static final DeferredHolder<Item, ItemCardDeck> CARD_DECK = ITEMS.register("card_deck", ItemCardDeck::new);
+    public static final DeferredHolder<Item, ItemCardCovered> CARD_COVERED = ITEMS.register("card_covered", ItemCardCovered::new);
+    public static final DeferredHolder<Item, ItemCard> CARD = ITEMS.register("card", ItemCard::new);
 
-    public static final RegistryObject<Item> POKER_CHIP_WHITE = ITEMS.register("poker_chip_white", () -> new ItemPokerChip((byte)0, 1));
-    public static final RegistryObject<Item> POKER_CHIP_RED = ITEMS.register("poker_chip_red", () -> new ItemPokerChip((byte)1,5));
-    public static final RegistryObject<Item> POKER_CHIP_BLUE = ITEMS.register("poker_chip_blue", () -> new ItemPokerChip((byte)2,10));
-    public static final RegistryObject<Item> POKER_CHIP_GREEN = ITEMS.register("poker_chip_green", () -> new ItemPokerChip((byte)3,25));
-    public static final RegistryObject<Item> POKER_CHIP_BLACK = ITEMS.register("poker_chip_black", () -> new ItemPokerChip((byte)4,100));
+    public static final DeferredHolder<Item, ItemPokerChip> POKER_CHIP_WHITE = ITEMS.register("poker_chip_white", () -> new ItemPokerChip((byte)0, 1));
+    public static final DeferredHolder<Item, ItemPokerChip> POKER_CHIP_RED = ITEMS.register("poker_chip_red", () -> new ItemPokerChip((byte)1,5));
+    public static final DeferredHolder<Item, ItemPokerChip> POKER_CHIP_BLUE = ITEMS.register("poker_chip_blue", () -> new ItemPokerChip((byte)2,10));
+    public static final DeferredHolder<Item, ItemPokerChip> POKER_CHIP_GREEN = ITEMS.register("poker_chip_green", () -> new ItemPokerChip((byte)3,25));
+    public static final DeferredHolder<Item, ItemPokerChip> POKER_CHIP_BLACK = ITEMS.register("poker_chip_black", () -> new ItemPokerChip((byte)4,100));
 
-    public static final RegistryObject<CreativeModeTab> TAB = TABS.register(PCReference.MOD_ID, () -> CreativeModeTab.builder()
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register(PCReference.MOD_ID, () -> CreativeModeTab.builder()
             .icon(() -> new ItemStack(CARD.get()))
             .title(Component.translatable("itemGroup." + PCReference.MOD_ID + ".tab"))
             .build());
-
-    //public static final RegistryObject<Item> DICE_WHITE = ITEMS.register("dice_white", ItemDice::new);
 
     public static void init (IEventBus modEventBus) {
         BLOCKS.register(modEventBus);
@@ -62,7 +58,7 @@ public class InitItems {
     }
 
     private static void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTab() == TAB.get()) {
+        if (event.getTabKey() == TAB.getKey()) {
             ITEMS.getEntries().stream().filter(object -> !(object.get() instanceof ItemCardCovered)).forEach((registryObject) -> {
                 if (registryObject.get() instanceof ItemCardDeck deck) {
                     deck.fillItemGroup(event);
