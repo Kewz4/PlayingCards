@@ -1,6 +1,7 @@
 package com.ombremoon.playingcards.item;
 
 import com.ombremoon.playingcards.entity.EntityDice;
+import com.ombremoon.playingcards.init.InitEntityTypes;
 import com.ombremoon.playingcards.item.base.ItemBase;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -19,8 +20,10 @@ public class ItemDice extends ItemBase {
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
         ItemStack stack = pPlayer.getItemInHand(pUsedHand);
 
-        EntityDice cardDeck = new EntityDice(pLevel, pPlayer.position(), pPlayer.getYRot());
-        pLevel.addFreshEntity(cardDeck);
+        EntityDice dice = new EntityDice(InitEntityTypes.DICE.get(), pLevel);
+        dice.setPos(pPlayer.position());
+        dice.setYRot(pPlayer.getYRot());
+        pLevel.addFreshEntity(dice);
         stack.shrink(1);
 
         return InteractionResultHolder.success(stack);

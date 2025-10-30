@@ -3,13 +3,11 @@ package com.ombremoon.playingcards.network;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public class ModNetworking {
-    public static void register(final IPayloadRegistrar registrar) {
-        registrar.play(PacketInteractCard.TYPE, PacketInteractCard::new, handler -> handler
-                .server(PacketInteractCard::handle)
-        );
+    public static void register(final PayloadRegistrar registrar) {
+        registrar.playToServer(PacketInteractCard.TYPE, PacketInteractCard.STREAM_CODEC, PacketInteractCard::handle);
     }
 
     public static <MSG extends CustomPacketPayload> void sendToServer(MSG message) {

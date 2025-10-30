@@ -3,6 +3,7 @@ package com.ombremoon.playingcards.entity;
 import com.ombremoon.playingcards.entity.base.EntityStacked;
 import com.ombremoon.playingcards.init.InitItems;
 import com.ombremoon.playingcards.util.CardHelper;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -13,6 +14,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -66,8 +68,11 @@ public class EntityCard extends EntityStacked {
             stack.setDamageValue(getStack()[0]);
         }
 
-        CompoundTag nbt = stack.getOrCreateTag();
-        nbt.putByte("SkinID", getSkinID());
+        stack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, customData -> {
+            CompoundTag newTag = customData.copyTag();
+            newTag.putByte("SkinID", getSkinID());
+            return CustomData.of(newTag);
+        });
 
         return stack;
     }

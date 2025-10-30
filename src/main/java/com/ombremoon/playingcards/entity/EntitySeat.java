@@ -3,12 +3,13 @@ package com.ombremoon.playingcards.entity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.packets.SpawnEntity;
+import net.minecraft.world.phys.Vec3;
 
 public class EntitySeat extends Entity {
 
@@ -43,13 +44,12 @@ public class EntitySeat extends Entity {
     protected void addAdditionalSaveData(CompoundTag pCompound) {
     }
 
-    @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return new SpawnEntity(this);
+        return new ClientboundAddEntityPacket(this.getId(), this.getUUID(), this.getX(), this.getY(), this.getZ(), this.getXRot(), this.getYRot(), this.getType(), 0, Vec3.ZERO, this.getYHeadRot());
     }
 
     public static boolean create(Level world, double x, double y, double z, Player player) {
-        if (!world.isClientSide) {
+        if (!world.isClientSide()) {
             for (EntitySeat seat : world.getEntitiesOfClass(EntitySeat.class, player.getBoundingBox())) {
                 if (seat.getX() == x && seat.getY() == y && seat.getZ() == z) {
                     return true;

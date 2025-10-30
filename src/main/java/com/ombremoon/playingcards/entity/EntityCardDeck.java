@@ -3,6 +3,7 @@ package com.ombremoon.playingcards.entity;
 import com.ombremoon.playingcards.entity.base.EntityStacked;
 import com.ombremoon.playingcards.init.InitItems;
 import com.ombremoon.playingcards.util.CardHelper;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -13,6 +14,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -54,13 +56,22 @@ public class EntityCardDeck extends EntityStacked {
 
     @Override
     protected void onHit() {
+        if (isStacked()) {
+            setStack(CardHelper.createShuffledDeck());
+            playSound(SoundEvents.WOOL_PLACE, 1.0F, 1.0F);
+        } else {
+            ejectItems();
+        }
     }
 
     @Override
     public ItemStack getPickResult() {
         ItemStack stack = new ItemStack(InitItems.CARD_DECK.get());
-        CompoundTag nbt = stack.getOrCreateTag();
-        nbt.putByte("SkinID", getSkinID());
+        stack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, customData -> {
+            CompoundTag newTag = customData.copyTag();
+            newTag.putByte("SkinID", getSkinID());
+            return CustomData.of(newTag);
+        });
         return stack;
     }
 
@@ -118,6 +129,6 @@ public class EntityCardDeck extends EntityStacked {
 
     @Override
     public boolean isAttackable() {
-        return false;
+        return true;
     }
 }

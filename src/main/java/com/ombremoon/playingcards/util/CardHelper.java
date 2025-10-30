@@ -14,6 +14,17 @@ import net.minecraft.world.phys.Vec3;
 
 public class CardHelper {
     public static final String[] CARD_SKIN_NAMES = new String[]{"item.card.skin_default", "item.card.skin_red", "item.card.skin_blue"};
+    public static final String[] CARD_NAMES = new String[]{"item.card.ace", "item.card.two", "item.card.three", "item.card.four", "item.card.five", "item.card.six", "item.card.seven", "item.card.eight", "item.card.nine", "item.card.ten", "item.card.jack", "item.card.queen", "item.card.king"};
+    public static final String[] CARD_SUITS = new String[]{"item.card.spades", "item.card.hearts", "item.card.clubs", "item.card.diamonds"};
+
+
+    public static Component getCardName(int damageValue) {
+        if (damageValue < 0 || damageValue >= 52) {
+            return Component.literal("item.card.invalid");
+        }
+        return Component.translatable(CARD_NAMES[damageValue % 13]).append(" ").append(Component.translatable("misc.of")).append(" ").append(Component.translatable(CARD_SUITS[damageValue / 13]));
+    }
+
 
     public static byte[] createShuffledDeck() {
         byte[] deck = new byte[52];

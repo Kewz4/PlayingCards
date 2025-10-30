@@ -8,7 +8,7 @@ import com.ombremoon.playingcards.network.ModNetworking;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public class CommonClass {
 
@@ -21,7 +21,7 @@ public class CommonClass {
     }
 
     private static void registerPackets(final RegisterPayloadHandlersEvent event) {
-        final IPayloadRegistrar registrar = event.registrar(PCReference.MOD_ID).versioned("1.0");
+        final PayloadRegistrar registrar = event.registrar(PCReference.MOD_ID).versioned("1.0");
         ModNetworking.register(registrar);
     }
 

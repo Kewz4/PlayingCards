@@ -25,7 +25,6 @@ public class ItemPokerChip extends ItemBase {
         this.value = value;
     }
 
-    @Override
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
         pTooltipComponents.add(Component.translatable("lore.poker_chip_value").append(" ").withStyle(ChatFormatting.GRAY).append(Component.literal("$" + getValue()).withStyle(ChatFormatting.GREEN)));
     }
