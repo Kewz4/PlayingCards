@@ -10,7 +10,10 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Random;
+
 public class RenderEntityPokerChip extends EntityRenderer<EntityPokerChip> {
+    private final Random random = new Random();
     public RenderEntityPokerChip(EntityRendererProvider.Context p_174008_) {
         super(p_174008_);
     }
@@ -30,7 +33,8 @@ public class RenderEntityPokerChip extends EntityRenderer<EntityPokerChip> {
 
         for (byte i = 0; i < pEntity.getStack().length; i++) {
             pPoseStack.pushPose();
-            pPoseStack.translate(0, i * -0.01, 0);
+            random.setSeed(pEntity.getId() + i);
+            pPoseStack.translate(random.nextFloat() * 0.1 - 0.05, i * -0.01, random.nextFloat() * 0.1 - 0.05);
             CardHelper.renderItem(new ItemStack(ItemPokerChip.getItemFromID(pEntity.getStack()[i])), pEntity.level(), 0, 0, i * 0.032D, pPoseStack, pBuffer, pPackedLight);
             pPoseStack.popPose();
         }

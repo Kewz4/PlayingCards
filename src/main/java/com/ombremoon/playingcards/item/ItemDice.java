@@ -20,10 +20,19 @@ public class ItemDice extends ItemBase {
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
         ItemStack stack = pPlayer.getItemInHand(pUsedHand);
 
-        EntityDice dice = new EntityDice(InitEntityTypes.DICE.get(), pLevel);
-        dice.setPos(pPlayer.position());
-        dice.setYRot(pPlayer.getYRot());
-        pLevel.addFreshEntity(dice);
+        if (!pLevel.isClientSide) {
+            EntityDice dice = new EntityDice(InitEntityTypes.DICE.get(), pLevel);
+            dice.setPos(pPlayer.getEyePosition(1.0f));
+            net.minecraft.world.phys.Vec3 lookVec = pPlayer.getLookAngle();
+            net.minecraft.world.phys.Vec3 randomVec = new net.minecraft.world.phys.Vec3(
+                dice.getRandom().triangle(0.0, 0.0172275D * 1.0F),
+                dice.getRandom().triangle(0.0, 0.0172275D * 1.0F),
+                dice.getRandom().triangle(0.0, 0.0172275D * 1.0F)
+            );
+            net.minecraft.world.phys.Vec3 finalVec = lookVec.add(randomVec).scale(1.5);
+            dice.setDeltaMovement(finalVec);
+            pLevel.addFreshEntity(dice);
+        }
         stack.shrink(1);
 
         return InteractionResultHolder.success(stack);

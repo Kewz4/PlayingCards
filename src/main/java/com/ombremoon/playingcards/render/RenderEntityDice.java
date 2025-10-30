@@ -19,6 +19,12 @@ public class RenderEntityDice extends EntityRenderer<EntityDice> {
 
     @Override
     public void render(EntityDice pEntity, float pEntityYaw, float pPartialTicks, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
-        super.render(pEntity, pEntityYaw, pPartialTicks, pPoseStack, pBuffer, pPackedLight);
+        pPoseStack.pushPose();
+        pPoseStack.translate(0, 0.5, 0);
+        pPoseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(pEntityYaw));
+        pPoseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(90));
+        pPoseStack.scale(0.5f, 0.5f, 0.5f);
+        com.ombremoon.playingcards.util.CardHelper.renderItem(new net.minecraft.world.item.ItemStack(com.ombremoon.playingcards.init.InitItems.DICE.get()), pEntity.level(), 0, 0, 0, pPoseStack, pBuffer, pPackedLight);
+        pPoseStack.popPose();
     }
 }

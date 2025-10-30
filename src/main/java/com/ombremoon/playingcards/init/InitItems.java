@@ -46,6 +46,8 @@ public class InitItems {
     public static final DeferredHolder<Item, ItemPokerChip> POKER_CHIP_GREEN = ITEMS.register("poker_chip_green", () -> new ItemPokerChip((byte)3,25));
     public static final DeferredHolder<Item, ItemPokerChip> POKER_CHIP_BLACK = ITEMS.register("poker_chip_black", () -> new ItemPokerChip((byte)4,100));
 
+    public static final DeferredHolder<Item, com.ombremoon.playingcards.item.ItemDice> DICE = ITEMS.register("dice", com.ombremoon.playingcards.item.ItemDice::new);
+
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TAB = TABS.register(PCReference.MOD_ID, () -> CreativeModeTab.builder()
             .icon(() -> new ItemStack(CARD.get()))
             .title(Component.translatable("itemGroup." + PCReference.MOD_ID + ".tab"))

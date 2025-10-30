@@ -43,6 +43,18 @@ public class EntityCard extends EntityStacked {
 
     @Override
     public InteractionResult interactAt(Player pPlayer, Vec3 pVec, InteractionHand pHand) {
+        ItemStack heldItem = pPlayer.getItemInHand(pHand);
+
+        if (!heldItem.isEmpty() && (heldItem.getItem() == InitItems.CARD.get() || heldItem.getItem() == InitItems.CARD_COVERED.get())) {
+            if (!this.level().isClientSide) {
+                byte[] heldStack = new byte[]{(byte) heldItem.getDamageValue()};
+                this.setStack(CardHelper.combine(this.getStack(), heldStack));
+                heldItem.shrink(1);
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+
         if (!isStacked()) {
             if (pPlayer.isShiftKeyDown()) {
                 setCovered(!isCovered());

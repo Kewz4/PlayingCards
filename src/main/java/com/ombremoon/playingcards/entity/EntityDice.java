@@ -11,8 +11,38 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class EntityDice extends Entity {
+    private int roll = 0;
+    private int life = 120;
     public EntityDice(EntityType<?> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!this.level().isClientSide) {
+            if (this.life > 0) {
+                this.life--;
+            } else {
+                this.discard();
+            }
+        }
+
+        Vec3 motion = this.getDeltaMovement();
+        double motionX = motion.x;
+        double motionY = motion.y;
+        double motionZ = motion.z;
+
+        motionX *= 0.98D;
+        motionY *= 0.98D;
+        motionZ *= 0.98D;
+
+        if (this.onGround()) {
+            motionX *= 0.7D;
+            motionZ *= 0.7D;
+        }
+
+        this.setDeltaMovement(motionX, motionY, motionZ);
     }
 
     @Override
