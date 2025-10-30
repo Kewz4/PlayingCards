@@ -8,23 +8,32 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 
 public class RenderEntityDice extends EntityRenderer<EntityDice> {
-    public RenderEntityDice(EntityRendererProvider.Context p_174008_) {
-        super(p_174008_);
+
+    public RenderEntityDice(EntityRendererProvider.Context pContext) {
+        super(pContext);
+    }
+
+    @Override
+    public void render(EntityDice pEntity, float pEntityYaw, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
+        super.render(pEntity, pEntityYaw, pPartialTick, pPoseStack, pBuffer, pPackedLight);
+
+        //Push
+        pPoseStack.pushPose();
+
+        //Translate
+        pPoseStack.translate(0, 0.15D, 0);
+
+        //Scale
+        //matrixStack.func_227862_a_(0.6F, 0.6F, 0.6F);
+
+        //CardHelper.renderItem(new ItemStack(InitItems.DICE_WHITE.get()), 0, 0,0, matrixStack, buffer, combinedLight);
+
+        //Pop
+        pPoseStack.popPose();
     }
 
     @Override
     public ResourceLocation getTextureLocation(EntityDice pEntity) {
         return null;
-    }
-
-    @Override
-    public void render(EntityDice pEntity, float pEntityYaw, float pPartialTicks, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
-        pPoseStack.pushPose();
-        pPoseStack.translate(0, 0.5, 0);
-        pPoseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(pEntityYaw));
-        pPoseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(90));
-        pPoseStack.scale(0.5f, 0.5f, 0.5f);
-        com.ombremoon.playingcards.util.CardHelper.renderItem(new net.minecraft.world.item.ItemStack(com.ombremoon.playingcards.init.InitItems.DICE.get()), pEntity.level(), 0, 0, 0, pPoseStack, pBuffer, pPackedLight);
-        pPoseStack.popPose();
     }
 }

@@ -1,20 +1,26 @@
 package com.ombremoon.playingcards.entity.data;
 
-import com.ombremoon.playingcards.main.PCReference;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.codec.ByteBufCodecs;
+import com.ombremoon.playingcards.util.ArrayHelper;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 public class PCDataSerializers {
-    public static final DeferredRegister<EntityDataSerializer<?>> SERIALIZERS = DeferredRegister.create(NeoForgeRegistries.ENTITY_DATA_SERIALIZERS, PCReference.MOD_ID);
 
-    public static final DeferredHolder<EntityDataSerializer<?>, EntityDataSerializer<byte[]>> STACK = SERIALIZERS.register("stack", () -> EntityDataSerializer.forValueType(ByteBufCodecs.BYTE_ARRAY));
+    public static final EntityDataSerializer<Byte[]> STACK = new EntityDataSerializer<>() {
 
-    public static void init(IEventBus bus) {
-        SERIALIZERS.register(bus);
-    }
+        @Override
+        public void write(FriendlyByteBuf friendlyByteBuf, Byte[] bytes) {
+            friendlyByteBuf.writeByteArray(ArrayHelper.toPrimitive(bytes));
+        }
+
+        @Override
+        public Byte[] read(FriendlyByteBuf friendlyByteBuf) {
+            return ArrayHelper.toObject(friendlyByteBuf.readByteArray());
+        }
+
+        @Override
+        public Byte[] copy(Byte[] bytes) {
+            return ArrayHelper.clone(bytes);
+        }
+    };
 }

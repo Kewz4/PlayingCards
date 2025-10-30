@@ -137,19 +137,4 @@ public class EntityPokerChip extends EntityStacked {
     public void setOwnerName(String name) {
         this.entityData.set(OWNER_NAME, name);
     }
-
-    @Override
-    public boolean isCustomNameVisible() {
-        return getOwnerUUID() != null;
-    }
-
-    @Override
-    public boolean isAttackable() {
-        return false;
-    }
-
-    @Override
-    public boolean canBeHitByProjectile() {
-        return isStacked() && super.canBeHitByProjectile();
-    }
 }

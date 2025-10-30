@@ -68,7 +68,7 @@ public class EntityCard extends EntityStacked {
                 if (!isCovered()) {
                     cardStack.setDamageValue(topCard);
                 }
-                pPlayer.addItem(cardStack);
+                pPlayer.getInventory().add(cardStack);
 
                 byte[] newStack = new byte[this.getStack().length - 1];
                 System.arraycopy(this.getStack(), 0, newStack, 0, newStack.length);
@@ -107,10 +107,6 @@ public class EntityCard extends EntityStacked {
         });
 
         return stack;
-    }
-
-    @Override
-    public void onClientRemoval() {
     }
 
     @Override
@@ -176,20 +172,5 @@ public class EntityCard extends EntityStacked {
 
     public void setCovered(boolean isCovered) {
         this.entityData.set(COVERED, isCovered);
-    }
-
-    @Override
-    public boolean isCustomNameVisible() {
-        return isStacked() && !this.level().isClientSide && hasCustomName() && this.isCustomNameVisible();
-    }
-
-    @Override
-    public boolean isAttackable() {
-        return false;
-    }
-
-    @Override
-    public boolean canBeHitByProjectile() {
-        return isStacked() && super.canBeHitByProjectile();
     }
 }

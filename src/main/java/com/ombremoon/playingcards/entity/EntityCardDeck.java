@@ -1,20 +1,18 @@
 package com.ombremoon.playingcards.entity;
 
 import com.ombremoon.playingcards.entity.base.EntityStacked;
+import com.ombremoon.playingcards.init.InitEntityTypes;
 import com.ombremoon.playingcards.init.InitItems;
 import com.ombremoon.playingcards.util.CardHelper;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -28,60 +26,46 @@ public class EntityCardDeck extends EntityStacked {
     }
 
     public EntityCardDeck(Level world, Vec3 pos, float rotation, byte skinID) {
-        super(com.ombremoon.playingcards.init.InitEntityTypes.CARD_DECK.get(), world);
+        super(InitEntityTypes.CARD_DECK.get(), world);
         setPos(pos);
-        setRotation(rotation);
-        setSkinID(skinID);
-        setStack(CardHelper.createShuffledDeck());
-        updateCardCount();
+        this.setStack(CardHelper.createShuffledDeck());
+        this.setRotation(rotation);
+        this.setSkinID(skinID);
     }
 
     @Override
     public InteractionResult interactAt(Player pPlayer, Vec3 pVec, InteractionHand pHand) {
+        if (this.getStack().length > 0) {
+            if (!this.level().isClientSide) {
+                byte topCard = this.getStack()[this.getStack().length - 1];
+                ItemStack cardStack = new ItemStack(InitItems.CARD_COVERED.get());
+                cardStack.setDamageValue(topCard);
+                pPlayer.getInventory().add(cardStack);
 
-        if (!pPlayer.isShiftKeyDown() && !isStacked()) {
-            byte cardID = getStack()[0];
-            ejectItem(cardID);
-            EntityCard card = new EntityCard(level(), position().add(0, 0.1, 0), getRotation(), getSkinID(), new byte[]{cardID}, false);
-            card.setDeckUUID(getUUID());
-            level().addFreshEntity(card);
-            updateCardCount();
-            playSound(SoundEvents.WOOL_PLACE, 1.0F, 1.0F);
-        } else {
-            setRotation(getRotation() + CardHelper.getRotationAmount(pPlayer));
+                byte[] newStack = new byte[this.getStack().length - 1];
+                System.arraycopy(this.getStack(), 0, newStack, 0, newStack.length);
+                this.setStack(newStack);
+            }
+            return InteractionResult.SUCCESS;
         }
-
-        return InteractionResult.SUCCESS;
+        return InteractionResult.FAIL;
     }
 
     @Override
     protected void onHit() {
         if (isStacked()) {
-            setStack(CardHelper.createShuffledDeck());
-            playSound(SoundEvents.WOOL_PLACE, 1.0F, 1.0F);
+            this.setStack(CardHelper.createShuffledDeck());
         } else {
-            ejectItems();
+            if (!this.level().isClientSide) {
+                this.spawnAtLocation(new ItemStack(InitItems.CARD_DECK.get()));
+                this.discard();
+            }
         }
     }
 
     @Override
     public ItemStack getPickResult() {
-        ItemStack stack = new ItemStack(InitItems.CARD_DECK.get());
-        stack.update(DataComponents.CUSTOM_DATA, CustomData.EMPTY, customData -> {
-            CompoundTag newTag = customData.copyTag();
-            newTag.putByte("SkinID", getSkinID());
-            return CustomData.of(newTag);
-        });
-        return stack;
-    }
-
-    public void updateCardCount() {
-        if (getStack().length > 0) {
-            setCustomNameVisible(true);
-            setCustomName(CardHelper.getCardAmountComponent(getStack().length));
-        } else {
-            setCustomNameVisible(false);
-        }
+        return new ItemStack(InitItems.CARD_DECK.get());
     }
 
     @Override
@@ -89,7 +73,6 @@ public class EntityCardDeck extends EntityStacked {
         super.readAdditionalSaveData(pCompound);
         setRotation(pCompound.getFloat("Rotation"));
         setSkinID(pCompound.getByte("SkinID"));
-        updateCardCount();
     }
 
     @Override
@@ -120,15 +103,5 @@ public class EntityCardDeck extends EntityStacked {
 
     public void setSkinID(byte id) {
         this.entityData.set(SKIN_ID, id);
-    }
-
-    @Override
-    public boolean isCustomNameVisible() {
-        return this.level().isClientSide && hasCustomName() && this.isCustomNameVisible();
-    }
-
-    @Override
-    public boolean isAttackable() {
-        return true;
     }
 }

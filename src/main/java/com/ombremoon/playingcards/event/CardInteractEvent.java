@@ -1,8 +1,6 @@
 package com.ombremoon.playingcards.event;
 
 import com.ombremoon.playingcards.item.ItemCardCovered;
-import com.ombremoon.playingcards.network.ModNetworking;
-import com.ombremoon.playingcards.network.PacketInteractCard;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -12,27 +10,20 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 
 public class CardInteractEvent {
-
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
-    public void onLeftClick(InputEvent.InteractionKeyMappingTriggered event) {
-
+    public void onLeftClick(InputEvent.MouseButton event) {
         Minecraft mc = Minecraft.getInstance();
 
         if (mc.screen == null) {
-
-            if (event.isAttack()) {
-
+            if (event.getAction() == 1 && event.getButton() == 0) {
                 Player player = mc.player;
 
                 if (mc.level != null && player != null) {
-
                     ItemStack heldStack = player.getMainHandItem();
 
                     if (heldStack.getItem() instanceof ItemCardCovered card) {
                         card.flipCard(heldStack, player);
-
-                        ModNetworking.sendToServer(new PacketInteractCard("flipinv"));
                         event.setCanceled(true);
                     }
                 }

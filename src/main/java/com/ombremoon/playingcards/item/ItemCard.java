@@ -1,15 +1,14 @@
 package com.ombremoon.playingcards.item;
 
-import com.ombremoon.playingcards.item.base.ItemBase;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-
 import com.ombremoon.playingcards.util.CardHelper;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
 import java.util.List;
-public class ItemCard extends ItemBase {
+
+public class ItemCard extends Item {
     public ItemCard() {
         super(new Item.Properties().stacksTo(1));
     }

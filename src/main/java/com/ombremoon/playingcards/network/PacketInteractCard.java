@@ -1,38 +1,48 @@
 package com.ombremoon.playingcards.network;
 
+import net.minecraft.network.FriendlyByteBuf;
 import com.ombremoon.playingcards.item.ItemCardCovered;
-import com.ombremoon.playingcards.main.CommonClass;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.NetworkEvent;
 
-public record PacketInteractCard(String command) implements CustomPacketPayload {
-    public static final CustomPacketPayload.Type<PacketInteractCard> TYPE = new CustomPacketPayload.Type<>(CommonClass.customLocation("interact_card"));
-    public static final StreamCodec<ByteBuf, PacketInteractCard> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8,
-            PacketInteractCard::command,
-            PacketInteractCard::new
-    );
+import java.util.function.Supplier;
 
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+public class PacketInteractCard {
+    private final String command;
+
+    public PacketInteractCard (String command) {
+        this.command = command;
     }
 
-    public static void handle(final PacketInteractCard packet, final IPayloadContext context) {
-        context.enqueueWork(() -> {
-            if (context.player() instanceof ServerPlayer player) {
+    public PacketInteractCard (FriendlyByteBuf buf) {
+        command = buf.readUtf(11).trim();
+    }
+
+    public void encode(FriendlyByteBuf buf) {
+        buf.writeUtf(command, 11);
+    }
+
+    public static void handle(PacketInteractCard packet, Supplier<NetworkEvent.Context> ctx) {
+
+        ctx.get().enqueueWork(() -> {
+
+            ServerPlayer player = ctx.get().getSender();
+
+            if (player != null) {
+
                 if (packet.command.equalsIgnoreCase("flipinv")) {
+
                     Item item = player.getMainHandItem().getItem();
-                    if (item instanceof ItemCardCovered card) {
+
+                    if (item instanceof ItemCardCovered) {
+                        ItemCardCovered card = (ItemCardCovered)player.getMainHandItem().getItem();
                         card.flipCard(player.getMainHandItem(), player);
                     }
                 }
             }
         });
+
+        ctx.get().setPacketHandled(true);
     }
 }

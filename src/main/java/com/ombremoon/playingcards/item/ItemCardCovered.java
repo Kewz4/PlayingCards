@@ -1,44 +1,46 @@
 package com.ombremoon.playingcards.item;
 
-import com.ombremoon.playingcards.entity.EntityCard;
 import com.ombremoon.playingcards.init.InitItems;
-import com.ombremoon.playingcards.item.base.ItemBase;
-import com.ombremoon.playingcards.util.ItemHelper;
-import net.minecraft.world.InteractionResult;
+import com.ombremoon.playingcards.util.CardHelper;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 
-public class ItemCardCovered extends ItemBase {
+import java.util.List;
+import java.util.UUID;
+
+public class ItemCardCovered extends Item {
     public ItemCardCovered() {
         super(new Item.Properties().stacksTo(1));
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext pContext) {
-        Level world = pContext.getLevel();
-        if (!world.isClientSide) {
-            EntityCard card = new EntityCard(world, pContext.getClickLocation(), pContext.getRotation(), ItemHelper.getNBT(pContext.getItemInHand()).getByte("SkinID"), new byte[0], true);
-            world.addFreshEntity(card);
-            pContext.getItemInHand().shrink(1);
-            return InteractionResult.SUCCESS;
+    public void appendHoverText(ItemStack pStack, TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pTooltipFlag) {
+        CustomData customData = pStack.get(DataComponents.CUSTOM_DATA);
+        if (customData != null) {
+            CompoundTag nbt = customData.copyTag();
+            pTooltipComponents.add(Component.translatable("lore.cover").append(" ").append(Component.translatable(CardHelper.CARD_SKIN_NAMES[nbt.getByte("SkinID")])));
         }
-        return InteractionResult.CONSUME;
+        super.appendHoverText(pStack, pContext, pTooltipComponents, pTooltipFlag);
     }
 
-    public void flipCard(ItemStack stack, Player player) {
-        if (!player.level().isClientSide) {
-            ItemStack newStack = new ItemStack(InitItems.CARD.get(), 1);
-            newStack.setDamageValue((int) (Math.random() * 52));
-            ItemHelper.getNBT(newStack).putByte("SkinID", ItemHelper.getNBT(stack).getByte("SkinID"));
-            player.getInventory().setItem(player.getInventory().selected, newStack);
+    public void flipCard(ItemStack heldItem, LivingEntity entity) {
+        if (entity instanceof Player player) {
+            CustomData customData = heldItem.get(DataComponents.CUSTOM_DATA);
+            if (customData != null) {
+                CompoundTag heldNBT = customData.copyTag();
+                ItemStack newCard = new ItemStack(InitItems.CARD.get());
+                newCard.setDamageValue(heldItem.getDamageValue());
+                newCard.set(DataComponents.CUSTOM_DATA, CustomData.of(heldNBT));
+                player.setItemInHand(InteractionHand.MAIN_HAND, newCard);
+            }
         }
-    }
-
-    @Override
-    public boolean isDamageable(ItemStack stack) {
-        return false;
     }
 }

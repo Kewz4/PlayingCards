@@ -2,37 +2,34 @@ package com.ombremoon.playingcards.item;
 
 import com.ombremoon.playingcards.entity.EntityPokerChip;
 import com.ombremoon.playingcards.init.InitItems;
-import com.ombremoon.playingcards.item.base.ItemBase;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ItemPokerChip extends ItemBase {
-    private final byte colorID;
+public class ItemPokerChip extends Item {
+    private final byte chipID;
     private final int value;
 
-    public ItemPokerChip(byte colorID, int value) {
+    public ItemPokerChip(byte chipID, int value) {
         super(new Item.Properties());
-        this.colorID = colorID;
+        this.chipID = chipID;
         this.value = value;
     }
 
-    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
-        pTooltipComponents.add(Component.translatable("lore.poker_chip_value").append(" ").withStyle(ChatFormatting.GRAY).append(Component.literal("$" + getValue()).withStyle(ChatFormatting.GREEN)));
+    @Override
+    public void appendHoverText(ItemStack pStack, TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+        pTooltipComponents.add(Component.translatable("lore.poker_chip_value").append(" ").append(Component.literal("$" + value)));
     }
 
     @Override
     public InteractionResult useOn(UseOnContext pContext) {
         if (!pContext.getLevel().isClientSide) {
-            EntityPokerChip pokerChip = new EntityPokerChip(pContext.getLevel(), pContext.getClickLocation(), new byte[]{getChipID()});
+            EntityPokerChip pokerChip = new EntityPokerChip(pContext.getLevel(), pContext.getClickLocation(), new byte[]{chipID});
             pContext.getLevel().addFreshEntity(pokerChip);
             pContext.getItemInHand().shrink(1);
             return InteractionResult.SUCCESS;
@@ -41,11 +38,7 @@ public class ItemPokerChip extends ItemBase {
     }
 
     public byte getChipID() {
-        return colorID;
-    }
-
-    public int getValue() {
-        return value;
+        return chipID;
     }
 
     public static Item getItemFromID(byte id) {

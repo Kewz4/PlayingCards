@@ -2,12 +2,14 @@ package com.ombremoon.playingcards.main;
 
 import com.ombremoon.playingcards.entity.data.PCDataSerializers;
 import com.ombremoon.playingcards.event.CardInteractEvent;
-import com.ombremoon.playingcards.init.*;
+import com.ombremoon.playingcards.init.InitEntityTypes;
+import com.ombremoon.playingcards.init.InitItems;
+import com.ombremoon.playingcards.init.InitRecipes;
+import com.ombremoon.playingcards.init.InitTileEntityTypes;
 import com.ombremoon.playingcards.network.ModNetworking;
 import com.ombremoon.playingcards.render.*;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -36,8 +38,6 @@ public class PlayingCards {
 
     private void onClientSetup(final FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            InitModelOverrides.init();
-
             EntityRenderers.register(InitEntityTypes.CARD.get(), RenderEntityCard::new);
             EntityRenderers.register(InitEntityTypes.CARD_DECK.get(), RenderEntityCardDeck::new);
             EntityRenderers.register(InitEntityTypes.POKER_CHIP.get(), RenderEntityPokerChip::new);
@@ -46,7 +46,6 @@ public class PlayingCards {
         });
     }
 
-    @SubscribeEvent
     public void registerPackets(final RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar(PCReference.MOD_ID).versioned("1.0");
         ModNetworking.register(registrar);
